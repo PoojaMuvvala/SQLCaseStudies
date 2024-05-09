@@ -1,8 +1,113 @@
--- What is the total amount each customer spent at the restaurant?
-select s.customer_id,SUM(m.price) as Total from sales s join menu m on s.product_id=m.product_id group by customer_id
+-- 1. What is the total amount each customer spent at the restaurant?
+select 
+s.customer_id,
+SUM(m.price) as Total 
+from sales s join menu m 
+on s.product_id=m.product_id 
+group by customer_id
 
--- How many days has each customer visited the restaurant?
-select customer_id,count(distinct order_date) as #count from sales group by customer_id
+-- 2. How many days has each customer visited the restaurant?
+select customer_id,
+count(distinct order_date) as #count
+ from sales 
+ group by customer_id
 
--- What was the first item from the menu purchased by each customer?
-select s.customer_id,m.product_id,m.product_name from sales s join menu m on s.product_id=m.product_id order by s.order_date
+-- 3. What was the first item from the menu purchased by each customer?
+select s.customer_id,
+m.product_id,
+m.product_name 
+from sales s join menu m 
+on s.product_id=m.product_id 
+order by s.order_date
+
+-- 4. What is the most purchased item on the menu and how many times was it purchased by all customers?
+
+select top 1
+  m.product_name as Most_Purchased_Product,
+  COUNT(s.product_id) as No_of_times_Purchased
+ from sales s join menu m 
+ on m.product_id = s.product_id
+  group by s.product_id,m.product_name 
+  Order by COUNT(s.product_id) desc
+
+-- 5. Which item was the most popular for each customer?
+
+SELECT customer_id, product_name 
+FROM (
+    SELECT s.customer_id, m.product_name, COUNT(m.product_name) AS product_count,
+           RANK() OVER (PARTITION BY s.customer_id ORDER BY COUNT(m.product_name) DESC) AS rank_num
+    FROM sales s 
+    JOIN menu m ON s.product_id = m.product_id 
+    GROUP BY s.customer_id, m.product_name
+) AS X 
+WHERE rank_num = 1;
+
+-- 6. Which item was purchased first by the customer after they became a member?
+
+WITH master_dining_table AS (
+    SELECT 
+        s.customer_id,
+        s.order_date,
+        mm.join_date,
+        m.product_name,
+        RANK() OVER (PARTITION BY s.customer_id ORDER BY s.order_date) AS first_time
+    FROM 
+        sales s 
+        JOIN menu m ON s.product_id = m.product_id
+        JOIN members mm ON mm.customer_id = s.customer_id 
+    WHERE 
+        s.order_date >= mm.join_date
+)
+
+SELECT 
+    customer_id, 
+    order_date, 
+    product_name 
+FROM 
+    master_dining_table 
+WHERE 
+    first_time = 1;
+
+-- 7. Which item was purchased just before the customer became a member?
+
+WITH master_dining_table AS (
+    SELECT 
+        s.customer_id,
+        s.order_date,
+        mm.join_date,
+        m.product_name,
+        RANK() OVER (PARTITION BY s.customer_id ORDER BY s.order_date desc) AS last_time_before_member
+    FROM 
+        sales s 
+        JOIN menu m ON s.product_id = m.product_id
+        JOIN members mm ON mm.customer_id = s.customer_id 
+    WHERE 
+        s.order_date < mm.join_date
+)
+
+SELECT 
+    customer_id, 
+    order_date, 
+    product_name
+FROM 
+    master_dining_table 
+WHERE 
+    last_time_before_member = 1;
+
+-- 8. What is the total items and amount spent for each member before they became a member?
+    
+    SELECT 
+        s.customer_id,
+        COUNT(m.product_name) as total_items,
+        SUM(m.price) as Amount_Spent
+
+    FROM 
+        sales s 
+        JOIN menu m ON s.product_id = m.product_id
+        JOIN members mm ON mm.customer_id = s.customer_id 
+    WHERE 
+        s.order_date < mm.join_date
+    group by s.customer_id
+
+-- 9. If each $1 spent equates to 10 points and sushi has a 2x points multiplier - how many points would each customer have?
+
