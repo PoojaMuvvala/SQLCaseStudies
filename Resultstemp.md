@@ -1,4 +1,7 @@
-|customer_id|join_date|
+|customer_id|product_name|
 |---|---|
-|A|2021-01-07|
-|B|2021-01-09|
+|A|sushi|
+|A|curry|
+|B|curry|
+|C|ramen|
+|C|ramen|

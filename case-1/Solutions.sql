@@ -134,3 +134,40 @@ SELECT
         sales s 
         JOIN menu m ON s.product_id = m.product_id
         JOIN members mm ON mm.customer_id = s.customer_id where order_date<= '2021-01-31' group by s.customer_id
+
+-- Bonus Questions --
+
+--Join all the tables so that the Danny's team get insights without referencing all tables seperately.
+
+SELECT 
+s.customer_id,
+s.order_date,
+m.product_name,
+m.price,
+case 
+when s.order_date>=mm.join_date then 'Y' 
+else 'N' 
+end as  member
+from sales s join menu m on s.product_id=m.product_id
+join members mm on s.customer_id=mm.customer_id
+
+-- Rank all the things
+
+with datatable as(
+SELECT 
+s.customer_id,
+s.order_date,
+m.product_name,
+m.price,
+case 
+when s.order_date>=mm.join_date then 'Y' 
+else 'N' 
+end as  member
+from sales s join menu m on s.product_id=m.product_id
+join members mm on s.customer_id=mm.customer_id)
+
+Select *,
+case 
+when member='N' then null
+else rank() OVER (Partition by customer_id,member order by order_date) end as ranking
+ from datatable
