@@ -9,16 +9,26 @@ group by customer_id
 -- 2. How many days has each customer visited the restaurant?
 select customer_id,
 count(distinct order_date) as #count
- from sales 
- group by customer_id
+from sales 
+group by customer_id;
 
--- 3. What was the first item from the menu purchased by each customer?
-select s.customer_id,
-m.product_id,
-m.product_name 
-from sales s join menu m 
-on s.product_id=m.product_id 
-order by s.order_date
+
+--3. What was the first item from the menu purchased by each customer?
+
+WITH table1 AS(
+    SELECT
+        s.customer_id,
+        m.product_id,
+        m.product_name,
+        s.order_date,
+        RANK() OVER (PARTITION BY s.customer_id ORDER BY s.order_date) AS Rank
+    FROM 
+        sales s 
+    JOIN 
+        menu m ON s.product_id = m.product_id
+)
+SELECT customer_id,product_name from table1 where Rank =1
+
 
 -- 4. What is the most purchased item on the menu and how many times was it purchased by all customers?
 
