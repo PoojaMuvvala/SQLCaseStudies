@@ -16,23 +16,14 @@
 
 3. What was the first item from the menu purchased by each customer?
 
-|customer_id|product_id|product_name|
-|---|---|---|
-|A|1|sushi|
-|A|2|curry|
-|B|2|curry|
-|C|3|ramen|
-|C|3|ramen|
-|B|2|curry|
-|B|1|sushi|
-|A|2|curry|
-|C|3|ramen|
-|A|3|ramen|
-|A|3|ramen|
-|A|3|ramen|
-|B|1|sushi|
-|B|3|ramen|
-|B|3|ramen|
+|customer_id|product_name|
+|---|---|
+|A|sushi|
+|A|curry|
+|B|curry|
+|C|ramen|
+|C|ramen|
+
 
 4. What is the most purchased item on the menu and how many times was it purchased by all customers?
 
